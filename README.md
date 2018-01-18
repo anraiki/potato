@@ -1,4 +1,4 @@
-# Project Title
+# Project Potato
 
 Welcome to Potato. This is a hobby project in the wake that Bota.to is dead. 
 
