@@ -1,0 +1,2 @@
+# botato
+Manga Aggregator
