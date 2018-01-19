@@ -1,31 +1,52 @@
-const express     = require('express');
-const Sequelize   = require('sequelize');
-const bodyParser  = require("body-parser")
+let express     = require('express');
+    http        = require('http'),
+    url         = require('url'),
+    bodyParser  = require("body-parser"),
+    passport    = require("passport")
+    jwt         = require("jsonwebtoken"),
+    env         = require('dotenv').load(),
+    bearerToken = require('express-bearer-token'),
+    Validator   = require('validator'),
+    _           = require('lodash');
 
-const sequelize = new Sequelize("database","username","password", {
-  host: "localhost",
-  dialect: "sqlite",
-  storage: "database.sqlite"
+//Initiate Express
+let app         = express(),
+    port        = process.env.PORT || 5000;
+
+//CORS
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
 
-sequelize.authenticate()
-  .then(() => {
-    console.log("Connection has been established through SQLITE")
-  })
-  .catch(err => {
-    console.log("An error has occured", err);
-  })
-
-const app = express();
-const port = process.env.PORT || 5000;
+//Bearer Token
+app.use(bearerToken());
+app.use((req, res, next) => {res.locals.token = req.token; next(); });
 
 //Body Parser for Express
 app.use(bodyParser.urlencoded({ extended: false }))
 
-app.post('/api/register' , (req, res) => {
-  let data = req.body;
-  console.log(data);
-  res.status(200).json({message: "Hello World"});
-});
+//Models
+var models = require("./models");
 
+models.sequelize
+  .authenticate()
+  .then(async ()=> {
+      console.log("Sequelize Authenticated");
+      models.sequelize.sync();
+  });
+
+//For Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+//Passport Strategies
+require('./controllers/passport.js')(passport, models);
+
+//Routes
+var routes = require('./controllers/routes');
+app.use("/", routes);
+
+//Read Together App?
 app.listen(port, () => console.log(`Listening on port ${port}`));
