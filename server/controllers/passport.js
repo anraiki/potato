@@ -1,12 +1,11 @@
-//load bcrypt
-var bcrypt          = require('bcrypt');
-var jwt             = require('jsonwebtoken');
-var validator       = require('validator');
-const saltRounds    = 10;
+let bcrypt          = require('bcrypt'),
+    jwt             = require('jsonwebtoken'),
+    validator       = require('validator'),
+    saltRounds      = 16;
 
 module.exports = function(passport, models) {
 
-    var User = models.user;
+    var User = models.users;
     var Op = models.Sequelize.Op
     var LocalStrategy = require('passport-local').Strategy;
 
@@ -18,7 +17,7 @@ module.exports = function(passport, models) {
             passReqToCallback: true // allows us to pass back the entire request to the callback
         },
 
-        function(req, email, password, done) {
+        (req, email, password, done) => {
             var post = req.body;
 
             if(!validator.isEmail(post.email)) {
@@ -33,30 +32,15 @@ module.exports = function(passport, models) {
                 }, false);
             }
 
-            if(!validator.isMobilePhone(post.phone,"any")) {
-                return done({
-                    message: "Invalid Phone Number",
-                }, false);
-            }
-
-            if(validator.isEmpty(post.first_name) || validator.isEmpty(post.last_name) ) {
-                return done({
-                    message: "The First and Last Name are required",
-                }, false);
-            }
-
             bcrypt.hash(post.password, saltRounds).then(function(hash) {
                 User.findOne({
                     where: {
-                        [Op.or]: [
-                            {email: post.email}, 
-                            {phone: post.phone}
-                        ]
+                        email: post.email
                     }
                 }).then(function(user) {
                     if (user) {
                         return done({
-                            message: 'An account exists with this email or phone',
+                            message: 'An account exists with this email',
                         }, false );
                     } else {
                         var userPassword = hash;
@@ -64,14 +48,7 @@ module.exports = function(passport, models) {
                             {
                                 email: post.email,
                                 password: userPassword,
-                                first_name: post.first_name,
-                                last_name: post.last_name,
-                                phone: post.phone
                             };
-
-                        if(post.can_drive == true || post.can_drive == 1) {
-                            data.can_drive = true;
-                        }
 
                         User.create(data).then(function(newUser, created) {
                             if (newUser) {
