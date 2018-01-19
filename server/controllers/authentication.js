@@ -10,9 +10,7 @@ exports.register_user = function(req, res) {
     passport.authenticate('local-signup', function(error, user, info) {
         if(user) {
             let token = jwt.sign({id: user.id}, process.env.JWT_SECRET_KEY);
-            let Usermeta = models.users_meta;
-            let post = req.body;
-            return res.status(200).json(response);
+            return res.status(200).json({token: token});
         } else if(error) {
             return res.status(409).json(error);
         }
