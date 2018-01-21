@@ -23,3 +23,9 @@ exports.get_series_by_id = async (req, res) => {
     }
 
 };
+
+exports.update_series_by_id = async (req, res) => {
+
+
+};
+
