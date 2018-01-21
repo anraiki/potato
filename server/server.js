@@ -45,7 +45,7 @@ app.use(passport.session());
 require('./controllers/passport.js')(passport, models);
 
 //Routes
-var routes = require('./controllers/routes');
+var routes = require('./controllers/');
 app.use("/", routes);
 
 //Read Together App?
