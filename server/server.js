@@ -25,7 +25,7 @@ app.use(bearerToken());
 app.use((req, res, next) => {res.locals.token = req.token; next(); });
 
 //Body Parser for Express
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }))
 
 //Models
 var models = require("./models");
